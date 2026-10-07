@@ -1,0 +1,91 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Orchestration Tax Lab â€” replay one where-is-my-order graph in two architectures and watch latency, tokens, and determinism diverge.">
+  <title>Orchestration Tax Lab â€” deterministic where you can</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+  <link rel="stylesheet" href="/styles.css">
+<!-- pb-shell --><link rel="stylesheet" href="./pb-shell.css"><!-- pb-shell --><!-- pb-back --><link rel="stylesheet" href="./pb-back.css"><!-- pb-back --></head>
+<body>
+<a class="skip-link" href="#run-controls">Skip to lab controls</a>
+<main>
+  <nav aria-label="Primary"><a aria-current="page" href="/">Lab</a><a href="/guide.html">Guide</a><a href="https://github.com/anhquanbd2021/deterministic-where-you-can">Source</a></nav>
+  <header class="hero">
+    <div>
+      <p class="eyebrow">Orchestration Tax Lab Â· 8 nodes, 2 honest model calls</p>
+      <h1>The router is a function,<br>not a model.</h1>
+      <p class="lede">Replay one <em>where-is-my-order?</em> request through the same eight-node graph in two architectures. Pay a model at every box and watch latency, tokens, and route count blow up â€” or keep the model where language is ambiguous and let code own control flow.</p>
+    </div>
+    <p class="warning"><strong>Educational model.</strong> Every run is simulated locally with fixed assumptions â€” 800 ms and 1,200 tokens per model call, 8 ms per code node. Nothing leaves your browser.</p>
+  </header>
+
+  <section class="panel controls" id="run-controls" aria-labelledby="run-title">
+    <div class="section-heading">
+      <div><p class="eyebrow">Dispatch board</p><h2 id="run-title">Run configuration</h2></div>
+      <div class="button-row">
+        <button id="run-once" type="button">Run once</button>
+        <button id="replay-seed" type="button" class="secondary">Replay same seed</button>
+        <button id="compare-100" type="button" class="secondary">Compare both modes Ã—100</button>
+      </div>
+    </div>
+    <div class="toggle-row">
+      <fieldset>
+        <legend>Architecture</legend>
+        <label><input type="radio" name="mode" value="every-node-llm"> <span>Every node is an LLM</span></label>
+        <label><input type="radio" name="mode" value="deterministic" checked> <span>Code where possible</span></label>
+      </fieldset>
+      <fieldset>
+        <legend>Fault + retry</legend>
+        <label><input type="checkbox" id="omit-tracking"> <span>Omit tracking number</span></label>
+        <label><input type="checkbox" id="bound-retries" checked> <span>Bound retries at 2</span></label>
+      </fieldset>
+      <fieldset>
+        <legend>Replay</legend>
+        <label class="seed-label"><span>Seed</span> <input type="number" id="seed" value="7" min="0" max="9999" inputmode="numeric"></label>
+      </fieldset>
+    </div>
+    <p class="muted">Fixture <code>ORD-1042</code>: <code>in_transit</code> via UPS, tracking <code>1Z999AA10123456784</code>. <strong>Omit tracking number</strong> forces every draft to fail the check; <strong>Bound retries at 2</strong> is the difference between escalation and a runaway bill.</p>
+  </section>
+
+  <section class="workspace" aria-label="Graph run workspace">
+    <section class="panel" aria-labelledby="graph-title">
+      <div class="section-heading"><div><p class="eyebrow">The graph</p><h2 id="graph-title">Eight nodes, one ownership split</h2></div></div>
+      <ol id="graph-track" class="track" aria-label="Agent graph nodes"></ol>
+      <p class="muted legend"><span class="chip chip-model">model</span> charged 800 ms + 1,200 tokens <span class="chip chip-code">code</span> charged 8 ms <span class="chip chip-human">human</span> terminal handoff</p>
+    </section>
+    <section class="panel" aria-labelledby="ledger-title">
+      <div class="section-heading"><div><p class="eyebrow">Event ledger</p><h2 id="ledger-title">Every metric is derived from this trace</h2></div><span id="terminal-badge" class="badge" role="status" aria-live="polite">â€”</span></div>
+      <p id="run-status" class="muted" role="status" aria-live="polite">Choose an architecture and run.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="Chronological event trace">
+        <table class="ledger">
+          <thead><tr><th>#</th><th>Node</th><th>Kind</th><th>Try</th><th>Charge</th><th>Next</th></tr></thead>
+          <tbody id="ledger-body"></tbody>
+        </table>
+      </div>
+      <dl id="run-metrics" class="metrics" aria-label="Run metrics"></dl>
+      <p class="muted reply-line"><strong>Last draft:</strong> <span id="last-reply">â€”</span></p>
+    </section>
+  </section>
+
+  <section class="workspace" aria-label="Replay results">
+    <section class="panel" aria-labelledby="replay-title">
+      <div class="section-heading"><div><p class="eyebrow">Determinism</p><h2 id="replay-title">Replay same seed â€” 100 runs, current controls</h2></div></div>
+      <div id="replay-result" class="result-block" role="status" aria-live="polite"><p class="muted">Code routing collapses 100 replays to one route; model routing scatters them.</p></div>
+    </section>
+    <section class="panel" aria-labelledby="compare-title">
+      <div class="section-heading"><div><p class="eyebrow">Orchestration tax</p><h2 id="compare-title">Same work, both architectures</h2></div></div>
+      <div id="compare-result" class="compare-grid" aria-live="polite"><p class="muted">Run <strong>Compare both modes Ã—100</strong> to price identical work in each architecture â€” median latency, p99, tokens, cost, terminals, unique routes.</p></div>
+    </section>
+  </section>
+
+  <p class="closing-links"><a href="/guide.html">Read the feature-by-feature guide</a><span class="sep" aria-hidden="true">Â·</span><a href="https://github.com/anhquanbd2021/deterministic-where-you-can">Inspect source and tests</a></p>
+</main>
+<script type="module" src="/app.js"></script>
+<!-- pb-shell --><a class="pb-shell" href="https://github.com/anhquanbd2021/deterministic-where-you-can" title="deterministic-where-you-can â€” an Article Playbook demo (view source)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2" y="2" width="9" height="9" rx="2" fill="#2dd4bf"/><rect x="13" y="2" width="9" height="9" rx="2" fill="#2dd4bf" opacity=".45"/><rect x="2" y="13" width="9" height="9" rx="2" fill="#2dd4bf" opacity=".45"/><rect x="13" y="13" width="9" height="9" rx="4.5" fill="#2dd4bf"/></svg><b>deterministic-where-you-can</b><i>DEMO</i></a><!-- pb-shell --><!-- pb-back --><a class="pb-back" id="pb-back" href="https://github.com/anhquanbd2021/deterministic-where-you-can" title="Back to the article â€” deterministic-where-you-can">â† Article <i>PLAYBOOK</i></a><script>(function(){var a=document.getElementById('pb-back');if(!a)return;var h=location.hostname;if(/^(localhost|127\.0\.0\.1)$/.test(h)){a.href='//'+h+':1234/microsites/article.html?slug=deterministic-where-you-can';}})();</script><!-- pb-back --></body>
+</html>
+
+

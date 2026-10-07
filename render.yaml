@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: deterministic-where-you-can
+    runtime: node
+    plan: free
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+    buildCommand: npm run check
+    startCommand: npm start
+    healthCheckPath: /health

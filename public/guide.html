@@ -1,0 +1,90 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Guide to the Orchestration Tax Lab â€” what each control proves about deterministic agent graphs and where the model tax hides.">
+<title>Orchestration Tax Lab Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<!-- pb-shell --><link rel="stylesheet" href="./pb-shell.css"><!-- pb-shell --><!-- pb-back --><link rel="stylesheet" href="./pb-back.css"><!-- pb-back --></head>
+<body>
+<a class="skip-link" href="#guide-start">Skip to guide</a>
+<main>
+  <nav aria-label="Primary"><a href="/">Lab</a><a aria-current="page" href="/guide.html">Guide</a><a href="https://github.com/anhquanbd2021/deterministic-where-you-can">Source</a></nav>
+
+  <header class="guide-intro" id="guide-start">
+    <p class="eyebrow">Feature-by-feature guide</p>
+    <h1>What the lab proves, control by control</h1>
+    <p class="lede">One customer question â€” <em>where is my order?</em> â€” replays through an eight-node agent graph. Each control isolates one claim about who should own control flow, and the event ledger is the evidence for all of it.</p>
+    <p class="warning"><strong>Honest limits.</strong> Latency and token figures are fixed assumptions (800 ms / 1,200 tokens per model call, 8 ms per code node), not measurements of a real provider. The point is the shape of the bill, not its exact total.</p>
+  </header>
+
+  <section class="panel">
+    <p class="eyebrow">Start here</p>
+    <h2>What this demo proves</h2>
+    <p>Run the default <strong>Code where possible</strong> configuration: two model calls, under two seconds, one possible route. Flip to <strong>Every node is an LLM</strong> and the same request pays the model tax at every box â€” and the router stops being a function. Then inject the fault: <strong>Omit tracking number</strong> makes every draft fail the check, and only the retry bound decides whether the run escalates or runs away.</p>
+    <p><a class="try" href="/">Open the lab</a></p>
+  </section>
+
+  <section class="guide-section">
+    <p class="eyebrow">The controls</p>
+    <h2>Each control isolates one claim</h2>
+    <div class="control-grid">
+      <article class="panel control"><span class="control-number">Control 01</span><h3>Architecture: Every node is an LLM</h3><p>Charges 800 ms + 1,200 tokens at all eight boxes and lets a seeded model draw choose each route.</p><dl><dt>Proves</dt><dd>the tax is per-node: same work, ~8Ã— the calls, plus a router that can't be replayed.</dd><dt>Key detail</dt><dd>even the human handoff is charged as a model call drafting the escalation note.</dd></dl></article>
+      <article class="panel control"><span class="control-number">Control 02</span><h3>Architecture: Code where possible</h3><p>Only <code>classify</code> and <code>draftReply</code> call a model. Fetch, policy, check, route, send are 8 ms code; escalate is human.</p><dl><dt>Proves</dt><dd>identical outcome at 2 model calls â€” the other six nodes never needed one.</dd><dt>Key detail</dt><dd>the router reads <code>hasTrackingNumber</code> + <code>retryCount</code> and nothing else.</dd></dl></article>
+      <article class="panel control"><span class="control-number">Control 03</span><h3>Omit tracking number</h3><p>Fault injection: every draft is fluent and apologetic but leaves out <code>1Z999AA10123456784</code>.</p><dl><dt>Proves</dt><dd>a polished reply can fail a fact invariant â€” tone is not evidence.</dd><dt>Key detail</dt><dd><code>checkReply</code> requires the literal tracking string; it never consults confidence.</dd></dl></article>
+      <article class="panel control"><span class="control-number">Control 04</span><h3>Bound retries at 2</h3><p>With the bound on, three drafts then <code>escalate</code>. Off, the loop only stops at the safety fuse.</p><dl><dt>Proves</dt><dd>an unbounded retry loop is a spend machine: exactly 25 attempts, terminal <code>runaway</code>.</dd><dt>Key detail</dt><dd><code>MAX_SIMULATION_ATTEMPTS = 25</code> â€” a simulation fuse, never a real infinite loop.</dd></dl></article>
+      <article class="panel control"><span class="control-number">Control 05</span><h3>Replay same seed</h3><p>Runs the current configuration 100 times and counts distinct routes from the emitted traces.</p><dl><dt>Proves</dt><dd>deterministic routing collapses replays to 1 route; model routing scatters them.</dd><dt>Key detail</dt><dd>identical state choosing different edges is what "can't replay an incident" means.</dd></dl></article>
+      <article class="panel control"><span class="control-number">Control 06</span><h3>Compare both modes Ã—100</h3><p>Prices identical work in both architectures: median + p99 latency, tokens, cost, terminals, unique routes.</p><dl><dt>Proves</dt><dd>the orchestration tax is structural, visible in medians â€” not just tail events.</dd><dt>Key detail</dt><dd>every number is reduced from event rows, so ledger and summary can never disagree.</dd></dl></article>
+      <article class="panel control"><span class="control-number">Control 07</span><h3>Escalate â€” the human path</h3><p>A real terminal node: after two failed retries the graph hands off with order id, failed drafts, and missing invariant.</p><dl><dt>Proves</dt><dd>recovery is executable: the run ends at <code>escalated</code>, not a decorative grey box.</dd><dt>Key detail</dt><dd>the last ledger row carries the evidence a person needs to act.</dd></dl></article>
+      <article class="panel control"><span class="control-number">Control 08</span><h3>Safety fuse</h3><p>A bookkeeping node that trips at 25 draft attempts â€” the demo's stand-in for a runaway loop.</p><dl><dt>Proves</dt><dd>unbounded retries have no terminal state of their own; something must cut the line.</dd><dt>Key detail</dt><dd>the fuse reports <code>runaway</code> plus accumulated spend â€” the bill is the warning.</dd></dl></article>
+    </div>
+  </section>
+
+  <section class="guide-section">
+    <p class="eyebrow">Architecture</p>
+    <h2>How the lab is built</h2>
+    <div class="table-wrap panel" tabindex="0" role="region" aria-label="Architecture table â€” layer, behavior, evidence">
+      <table>
+        <thead><tr><th>Layer</th><th>Behavior</th><th>Evidence</th></tr></thead>
+        <tbody>
+          <tr><td>Domain model</td><td>The eight-node graph, node work, pure router, seeded replay â€” no I/O.</td><td><code>public/graph.mjs</code></td></tr>
+          <tr><td>Browser lab</td><td>Renders the track, animates the ledger, wires every control.</td><td><code>public/app.js</code></td></tr>
+          <tr><td>Server</td><td>Zero-dependency static host plus <code>/health</code>, <code>/version</code>, <code>/api/graph</code>, <code>/api/run</code>.</td><td><code>app/server.js</code></td></tr>
+          <tr><td>Unit suite</td><td>Pure routing, event-derived metrics, replay, bounded and runaway paths.</td><td><code>test/graph.test.mjs</code></td></tr>
+          <tr><td>End-to-end suite</td><td>Boots the real server, drives <code>fetch()</code> through pages and both APIs.</td><td><code>test/e2e.test.mjs</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="guide-section">
+    <p class="eyebrow">Run locally</p>
+    <h2>Inspect the evidence</h2>
+    <pre class="code-block">npm start        # serve the lab on :3000
+npm test         # domain model + server + end-to-end suites
+npm run lab      # CLI: run both modes against ORD-1042 in the terminal
+npm run check    # all of it</pre>
+    <p>Try <code>node scripts/lab.mjs --omit --unbounded</code> to watch the runaway halt at the fuse, or <code>curl -X POST localhost:3000/api/run -d '{"mode":"deterministic"}'</code> for a raw event trace.</p>
+  </section>
+
+  <section class="guide-section panel">
+    <p class="eyebrow">Limits</p>
+    <h2>What this demo does not claim</h2>
+    <ul>
+      <li>Latency and tokens are fixed assumptions, not provider measurements â€” the ratio is the lesson.</li>
+      <li>The seeded model router is a coin with memory, not a real LLM â€” real routers fail less predictably, which is worse.</li>
+      <li>One invariant (tracking number) stands in for a real validation suite.</li>
+      <li>Escalation is modeled as a terminal event, not a queue, a page, or a person.</li>
+      <li>The fuse caps a simulation; production needs timeouts, budgets, and kill switches instead.</li>
+    </ul>
+    <p><a class="try" href="/">Return to Lab</a></p>
+  </section>
+</main>
+<!-- pb-shell --><a class="pb-shell" href="https://github.com/anhquanbd2021/deterministic-where-you-can" title="deterministic-where-you-can â€” an Article Playbook demo (view source)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2" y="2" width="9" height="9" rx="2" fill="#2dd4bf"/><rect x="13" y="2" width="9" height="9" rx="2" fill="#2dd4bf" opacity=".45"/><rect x="13" y="2" width="9" height="9" rx="4.5" fill="#2dd4bf"/></svg><b>deterministic-where-you-can</b><i>DEMO</i></a><!-- pb-shell --><!-- pb-back --><a class="pb-back" id="pb-back" href="https://github.com/anhquanbd2021/deterministic-where-you-can" title="Back to the article â€” deterministic-where-you-can">â† Article <i>PLAYBOOK</i></a><script>(function(){var a=document.getElementById('pb-back');if(!a)return;var h=location.hostname;if(/^(localhost|127\.0\.0\.1)$/.test(h)){a.href='//'+h+':1234/microsites/article.html?slug=deterministic-where-you-can';}})();</script><!-- pb-back --></body>
+</html>
+
+
